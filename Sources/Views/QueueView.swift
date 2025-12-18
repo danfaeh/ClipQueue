@@ -30,6 +30,28 @@ struct QueueView: View {
                                 isOldest: index == 0,
                                 queueManager: queueManager
                             )
+                            .onDrag {
+                                // Set the dragged item globally
+                                draggedItem = item
+                                print("🎯 Started dragging: \(item.shortPreview)")
+                                
+                                // Change to closed hand while dragging
+                                NSCursor.pop() // Remove open hand
+                                NSCursor.closedHand.set()
+                                
+                                // Create a custom drag preview that's more subtle
+                                let itemProvider = NSItemProvider(object: item.id.uuidString as NSString)
+                                
+                                // Create a subtle preview
+                                itemProvider.suggestedName = "Moving..."
+                                
+                                return itemProvider
+                            }
+                            .onDrop(of: [.text], delegate: DropViewDelegate(
+                                item: item,
+                                items: $queueManager.items,
+                                queueManager: queueManager
+                            ))
                         }
                     }
                     .padding(8)
@@ -77,9 +99,15 @@ struct QueueItemRow: View {
     let isOldest: Bool
     @ObservedObject var queueManager: QueueManager
     @State private var isHovering = false
+    @State private var isDragging = false
     
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
+            // Drag handle indicator
+            Image(systemName: "line.3.horizontal")
+                .font(.system(size: 10))
+                .foregroundColor(.secondary.opacity(0.5))
+                .help("Drag to reorder")
             // Content preview
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.shortPreview)
@@ -107,16 +135,27 @@ struct QueueItemRow: View {
             
             Spacer()
             
-            // Delete button (shown on hover)
-            if isHovering {
-                Button(action: {
-                    queueManager.removeItem(at: index)
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
+            // Delete button (always visible but subtle)
+            Button(action: {
+                queueManager.removeItem(at: index)
+            }) {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(isHovering ? .secondary : .secondary.opacity(0.3))
+                    .font(.system(size: 14))
+            }
+            .buttonStyle(PlainButtonStyle())
+            .help("Remove item")
+            .onHover { hovering in
+                // Change to arrow cursor when hovering delete button
+                if hovering {
+                    NSCursor.pop() // Remove hand cursor
+                    NSCursor.arrow.push()
+                } else {
+                    NSCursor.pop() // Remove arrow
+                    if isHovering {
+                        NSCursor.openHand.push() // Restore hand if still over item
+                    }
                 }
-                .buttonStyle(PlainButtonStyle())
-                .help("Remove item")
             }
         }
         .padding(8)
@@ -131,9 +170,19 @@ struct QueueItemRow: View {
             RoundedRectangle(cornerRadius: 4)
                 .fill(isHovering ? Color(NSColor.selectedControlColor).opacity(0.2) : Color.clear)
         )
+        .opacity(draggedItem?.id == item.id ? 0.5 : 1.0) // Fade out while dragging
         .onHover { hovering in
-            isHovering = hovering
+            withAnimation(.easeInOut(duration: 0.1)) {
+                isHovering = hovering
+            }
+            // Change cursor on hover
+            if hovering {
+                NSCursor.openHand.push()
+            } else {
+                NSCursor.pop()
+            }
         }
+        .contentShape(Rectangle()) // Make entire area hoverable
     }
     
     private var iconName: String {
@@ -158,3 +207,45 @@ struct QueueItemRow: View {
         }
     }
 }
+
+// MARK: - Drag and Drop Delegate
+
+struct DropViewDelegate: DropDelegate {
+    let item: ClipboardItem
+    @Binding var items: [ClipboardItem]
+    let queueManager: QueueManager
+    
+    func dropEntered(info: DropInfo) {
+        // Find the source and destination indices
+        guard let draggedItem = draggedItem,
+              let sourceIndex = items.firstIndex(where: { $0.id == draggedItem.id }),
+              let destinationIndex = items.firstIndex(where: { $0.id == item.id }),
+              sourceIndex != destinationIndex else {
+            return
+        }
+        
+        // Perform the move with a faster, smoother animation
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            queueManager.moveItem(from: sourceIndex, to: destinationIndex)
+        }
+        
+        print("🔄 Moved item from index \(sourceIndex) to \(destinationIndex)")
+    }
+    
+    func performDrop(info: DropInfo) -> Bool {
+        // Clear the dragged item when drop completes
+        draggedItem = nil
+        return true
+    }
+    
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        return DropProposal(operation: .move)
+    }
+    
+    func validateDrop(info: DropInfo) -> Bool {
+        return draggedItem != nil
+    }
+}
+
+// Helper to track dragged item globally
+private var draggedItem: ClipboardItem?

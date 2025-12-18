@@ -60,7 +60,7 @@ class Preferences: ObservableObject {
     
     private init() {
         // Load saved preferences or use defaults
-        let savedQueueSize = UserDefaults.standard.integer(forKey: "queueSize")
+        let savedQueueSize = UserDefaults.standard.integer(forKey: "queueSi7681AE14-3480-4542-BA08-70B4AD6E6AC5ze")
         self.queueSize = savedQueueSize == 0 ? 20 : savedQueueSize
         
         let savedKeepOnTop = UserDefaults.standard.object(forKey: "keepWindowOnTop")
