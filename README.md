@@ -9,7 +9,8 @@ A macOS menu bar app that queues clipboard items and lets you paste them sequent
 - 🪟 **Floating window** - Always on top, stays visible
 - 🔄 **FIFO queue** - First copied, first pasted
 - 💾 **Persistence** - Queue survives app restarts
-- 🎯 **Drag to reorder** - Change paste order anytime
+- 🎯 **Drag to reorder** - Change paste order by dragging items
+- 👋 **Intuitive cursors** - Open/closed hand feedback while dragging
 - 🎨 **Clean UI** - Minimal, native macOS design
 
 ## 🚀 Getting Started
