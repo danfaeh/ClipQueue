@@ -3,12 +3,6 @@ import Foundation
 class Preferences: ObservableObject {
     static let shared = Preferences()
     
-    @Published var queueSize: Int {
-        didSet {
-            UserDefaults.standard.set(queueSize, forKey: "queueSize")
-        }
-    }
-    
     @Published var launchAtLogin: Bool {
         didSet {
             UserDefaults.standard.set(launchAtLogin, forKey: "launchAtLogin")
@@ -60,9 +54,6 @@ class Preferences: ObservableObject {
     
     private init() {
         // Load saved preferences or use defaults
-        let savedQueueSize = UserDefaults.standard.integer(forKey: "queueSi7681AE14-3480-4542-BA08-70B4AD6E6AC5ze")
-        self.queueSize = savedQueueSize == 0 ? 20 : savedQueueSize
-        
         let savedKeepOnTop = UserDefaults.standard.object(forKey: "keepWindowOnTop")
         self.keepWindowOnTop = savedKeepOnTop == nil ? true : UserDefaults.standard.bool(forKey: "keepWindowOnTop")
         
@@ -80,7 +71,6 @@ class Preferences: ObservableObject {
     }
     
     func resetToDefaults() {
-        queueSize = 20
         launchAtLogin = false
         keepWindowOnTop = true
         showInMenuBar = true

@@ -113,7 +113,7 @@ struct QueueItemRow: View {
                 Text(item.shortPreview)
                     .lineLimit(2)
                     .font(.system(size: 12))
-                    .foregroundColor(isOldest ? .primary : .secondary)
+                    .foregroundColor(isOldest ? .white : Color.white.opacity(0.85))
                 
                 HStack(spacing: 4) {
                     // Type icon
@@ -123,7 +123,7 @@ struct QueueItemRow: View {
                     
                     Text(item.timeAgo)
                         .font(.system(size: 10))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.white.opacity(0.7))
                     
                     if isOldest {
                         Text("• Next")

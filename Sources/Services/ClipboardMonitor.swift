@@ -13,6 +13,9 @@ class ClipboardMonitor {
     }
     
     func startMonitoring() {
+        // Sync with current clipboard state to avoid picking up old changes
+        lastChangeCount = pasteboard.changeCount
+        
         // Check clipboard every 0.5 seconds
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             self?.checkClipboard()

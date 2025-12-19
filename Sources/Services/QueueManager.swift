@@ -5,7 +5,6 @@ import Combine
 class QueueManager: ObservableObject {
     @Published var items: [ClipboardItem] = []
     
-    private let maxQueueSize = 20
     private let userDefaultsKey = "clipQueueItems"
     private var lastPastedContent: String?
     
@@ -22,18 +21,8 @@ class QueueManager: ObservableObject {
             return
         }
         
-        // Don't add duplicates of the most recent item
-        if let lastItem = items.last, lastItem.content == item.content {
-            return
-        }
-        
-        // Add to end (newest position)
+        // Add to end (newest position) - allow duplicates
         items.append(item)
-        
-        // Limit queue size - remove oldest if needed
-        if items.count > maxQueueSize {
-            items.removeFirst()
-        }
         
         saveQueue()
     }

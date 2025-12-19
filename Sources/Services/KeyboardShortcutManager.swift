@@ -6,6 +6,7 @@ import CoreGraphics
 class KeyboardShortcutManager {
     private var hotKeyRefs: [EventHotKeyRef?] = []
     private var eventHandler: EventHandlerRef?
+    private var isMonitoringEnabled = true
     
     weak var queueManager: QueueManager?
     var onToggleWindow: (() -> Void)?
@@ -142,17 +143,30 @@ class KeyboardShortcutManager {
         )
     }
     
+    func setMonitoringEnabled(_ enabled: Bool) {
+        isMonitoringEnabled = enabled
+        print("⌨️ Monitoring \(enabled ? "enabled" : "disabled")")
+    }
+    
     private func handleHotKey(id: UInt32) {
+        // Always allow toggle window (case 2)
+        if id == 2 {
+            onToggleWindow?()
+            print("⌨️ Toggle window")
+            return
+        }
+        
+        // Check if monitoring is enabled for other shortcuts
+        guard isMonitoringEnabled else {
+            print("⌨️ Shortcut ignored (window hidden)")
+            return
+        }
+        
         switch id {
         case 1:
             // ⌃Q - Copy and record
             simulateCopy()
             print("⌨️ Copy and record")
-            
-        case 2:
-            // ⌃⌥⌘C - Toggle window
-            onToggleWindow?()
-            print("⌨️ Toggle window")
             
         case 3:
             // ⌃W - Paste next

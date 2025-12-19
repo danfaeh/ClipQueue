@@ -63,6 +63,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         window.isReleasedWhenClosed = false
         
+        // Add transparency
+        window.isOpaque = false
+        window.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.97)
+        window.alphaValue = 0.97
+        
         // Set up the SwiftUI content with callback
         let contentView = QueueView(
             queueManager: queueManager!,
@@ -108,12 +113,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let window = queueWindow else { return }
         
         if window.isVisible {
+            // Hide window and pause monitoring
             window.orderOut(nil)
-            print("🪟 Window hidden")
+            clipboardMonitor?.stopMonitoring()
+            keyboardShortcutManager?.setMonitoringEnabled(false)
+            print("🪟 Window hidden - monitoring paused")
         } else {
+            // Show window and resume monitoring
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: false)
-            print("🪟 Window shown")
+            clipboardMonitor?.startMonitoring()
+            keyboardShortcutManager?.setMonitoringEnabled(true)
+            print("🪟 Window shown - monitoring resumed")
         }
     }
     

@@ -27,24 +27,6 @@ struct GeneralPreferencesView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            // Queue Settings
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Queue Settings")
-                    .font(.headline)
-                
-                HStack {
-                    Text("Maximum queue size:")
-                    Spacer()
-                    Stepper("\(preferences.queueSize) items", value: $preferences.queueSize, in: 10...100, step: 5)
-                }
-                
-                Text("Older items will be automatically removed when the queue is full.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Divider()
-            
             // Startup
             VStack(alignment: .leading, spacing: 8) {
                 Text("Startup")
