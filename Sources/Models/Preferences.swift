@@ -1,4 +1,5 @@
 import Foundation
+import ServiceManagement
 
 class Preferences: ObservableObject {
     static let shared = Preferences()
@@ -6,6 +7,8 @@ class Preferences: ObservableObject {
     @Published var launchAtLogin: Bool {
         didSet {
             UserDefaults.standard.set(launchAtLogin, forKey: "launchAtLogin")
+            // Actually enable/disable launch at login
+            LaunchAtLoginManager.shared.setLaunchAtLogin(enabled: launchAtLogin)
         }
     }
     
